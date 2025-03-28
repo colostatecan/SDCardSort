@@ -1,109 +1,8 @@
+import React, { useState } from "react";
+import { useDrag, useDrop, DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
+import { Button } from "@/components/ui/button";
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Card Sorting Game</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      margin: 0;
-      padding: 20px;
-      background: #f4f4f4;
-    }
-    h1, h2 {
-      text-align: center;
-    }
-    .container {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-around;
-      gap: 10px;
-    }
-    .pile {
-      background: white;
-      border: 2px solid #ccc;
-      border-radius: 8px;
-      padding: 10px;
-      width: 22%;
-      min-height: 300px;
-    }
-    .pile h3 {
-      text-align: center;
-    }
-    .card {
-      background: #fff;
-      border: 1px solid #aaa;
-      border-radius: 6px;
-      padding: 8px;
-      margin: 4px 0;
-      cursor: grab;
-      text-align: center;
-    }
-    .highlight {
-      border-color: #007BFF;
-      background: #E9F5FF;
-    }
-    #top-five {
-      text-align: center;
-      margin-top: 20px;
-    }
-    .top-btn {
-      margin: 4px;
-      padding: 6px 12px;
-      cursor: pointer;
-      border: none;
-      border-radius: 4px;
-      background: #007BFF;
-      color: white;
-    }
-    .top-btn.disabled {
-      background: #aaa;
-      cursor: not-allowed;
-    }
-  </style>
-</head>
-<body>
-
-<h1>Card Sorting Game</h1>
-<p style="text-align:center;">Drag cards into piles. Then select your top 5 goals from the "Important" pile.</p>
-
-<div class="container">
-  <div class="pile" id="important" ondragover="allowDrop(event)" ondrop="drop(event, 'important')">
-    <h3>Important</h3>
-  </div>
-  <div class="pile" id="neutral" ondragover="allowDrop(event)" ondrop="drop(event, 'neutral')">
-    <h3>Neutral</h3>
-  </div>
-  <div class="pile" id="notImportant" ondragover="allowDrop(event)" ondrop="drop(event, 'notImportant')">
-    <h3>Not Important</h3>
-  </div>
-  <div class="pile" id="unassigned" ondragover="allowDrop(event)" ondrop="drop(event, 'unassigned')">
-    <h3>Unassigned</h3>
-  </div>
-</div>
-
-<div id="top-five">
-  <h2>Your Top 5 Goals</h2>
-  <div id="important-cards"></div>
-  <ol id="top-list"></ol>
-  <button class="top-btn" onclick="resetTopFive()">Reset Top 5</button>
-</div>
-function updateFormFields() {
-  document.getElementById('topFiveField').value = topFive.join(', ');
-  document.getElementById('importantField').value = getPileValues('important');
-  document.getElementById('neutralField').value = getPileValues('neutral');
-  document.getElementById('notImportantField').value = getPileValues('notImportant');
-  document.getElementById('unassignedField').value = getPileValues('unassigned');
-}
-
-function getPileValues(pileId) {
-  const cards = document.getElementById(pileId).querySelectorAll('.card');
-  return Array.from(cards).map(c => c.textContent).join(', ');
-}
-
-<script>
 const goals = [
   "Clarity", "Simplicity", "Speed", "Accuracy", "Transparency",
   "Efficiency", "Support", "Consistency", "Flexibility", "Autonomy",
@@ -113,111 +12,123 @@ const goals = [
   "Empowerment", "Streamlining", "Reliability", "Compliance", "Innovation"
 ];
 
-let topFive = [];
-
-function createCard(goal) {
-  const card = document.createElement('div');
-  card.className = 'card';
-  card.draggable = true;
-  card.textContent = goal;
-  card.id = 'card-' + goal.replace(/\s+/g, '-');
-  card.addEventListener('dragstart', (e) => e.dataTransfer.setData('text', card.id));
-  return card;
-}
-
-function allowDrop(e) {
-  e.preventDefault();
-}
-
-function drop(e, pileId) {
-  e.preventDefault();
-  const data = e.dataTransfer.getData('text');
-  const card = document.getElementById(data);
-  const targetPile = document.getElementById(pileId);
-  if (card && targetPile && targetPile !== card.parentElement) {
-    targetPile.appendChild(card);
-    if (pileId === 'important') {
-      updateImportantCards();
-    }
-  }
-}
-
-function updateImportantCards() {
-  const container = document.getElementById('important-cards');
-  const importantPile = document.getElementById('important');
-  const cards = importantPile.querySelectorAll('.card');
-  container.innerHTML = '<h4>Select cards below for Top 5</h4>';
-  cards.forEach(card => {
-    const btn = document.createElement('button');
-    btn.className = 'top-btn';
-    btn.textContent = card.textContent;
-    btn.disabled = topFive.includes(card.textContent) || topFive.length >= 5;
-    if (btn.disabled) btn.classList.add('disabled');
-    btn.onclick = () => selectTopFive(card.textContent);
-    container.appendChild(btn);
-  });
-}
-
-function selectTopFive(goal) {
-  if (topFive.length < 5 && !topFive.includes(goal)) {
-    topFive.push(goal);
-    renderTopList();
-    updateImportantCards();
-  }
-}
-
-function renderTopList() {
-  const list = document.getElementById('top-list');
-  list.innerHTML = '';
-  topFive.forEach(g => {
-    const li = document.createElement('li');
-    li.textContent = g;
-    list.appendChild(li);
-  });
-  document.getElementById('topFiveField').value = topFive.join(', ');
-}
-
-function resetTopFive() {
-  topFive = [];
-  renderTopList();
-  updateImportantCards();
-}
-
-// Initialize unassigned pile
-window.onload = () => {
-  const unassigned = document.getElementById('unassigned');
-  goals.forEach(goal => unassigned.appendChild(createCard(goal)));
+const pileNames = {
+  important: "Important",
+  neutral: "Neutral",
+  notImportant: "Not Important",
+  unassigned: "Unassigned"
 };
-  document.getElementById('results-form').addEventListener('submit', function (e) {
-  updateFormFields();
-});
 
-</script>
-</body>
-</html>
-<form action="https://formsubmit.co/candice.clemens@colostate.edu" method="POST" id="results-form">
-  <input type="hidden" name="_subject" value="Card Sort Game Submission">
-  <input type="hidden" name="topFive" id="topFiveField">
-  <input type="hidden" name="importantPile" id="importantField">
-  <input type="hidden" name="neutralPile" id="neutralField">
-  <input type="hidden" name="notImportantPile" id="notImportantField">
-  <input type="hidden" name="unassignedPile" id="unassignedField">
-  <button class="top-btn" type="submit">Submit Results</button>
-</form>
+const Card = ({ card }) => {
+  const [{ isDragging }, drag] = useDrag(() => ({
+    type: "CARD",
+    item: { card },
+    collect: (monitor) => ({
+      isDragging: monitor.isDragging()
+    })
+  }), [card]);
 
-function updateFormFields() {
-  document.getElementById('topFiveField').value = topFive.join(', ');
-  document.getElementById('importantField').value = getPileValues('important');
-  document.getElementById('neutralField').value = getPileValues('neutral');
-  document.getElementById('notImportantField').value = getPileValues('notImportant');
-  document.getElementById('unassignedField').value = getPileValues('unassigned');
-document.getElementById('results-form').addEventListener('submit', function (e) {
-  updateFormFields();
-});
+  return (
+    <div
+      ref={drag}
+      className="bg-white shadow p-2 m-1 rounded cursor-move text-center hover:bg-blue-100"
+      style={{ opacity: isDragging ? 0.5 : 1 }}
+    >
+      {card}
+    </div>
+  );
+};
 
-}
+const Pile = ({ label, pileKey, cards, onDropCard }) => {
+  const [, drop] = useDrop(() => ({
+    accept: "CARD",
+    drop: (item) => onDropCard(item.card, pileKey)
+  }), [cards]);
 
-function getPileValues(pileId) {
-  const cards = document.getElementById(pileId).querySelectorAll('.card');
-  return Array.from(cards).map(c => c.textContent).join(', ');
+  return (
+    <div ref={drop} className="border rounded p-4 m-2 w-full sm:w-1/4 min-h-[300px]">
+      <h2 className="font-bold text-lg mb-2 text-center">{label}</h2>
+      {cards.map((card) => (
+        <Card key={card} card={card} />
+      ))}
+    </div>
+  );
+};
+
+export default function CardSortGame() {
+  const [piles, setPiles] = useState({
+    important: [],
+    neutral: [],
+    notImportant: [],
+    unassigned: goals
+  });
+
+  const [topFive, setTopFive] = useState([]);
+
+  const moveCard = (card, targetPile) => {
+    setPiles((prev) => {
+      const newPiles = {
+        important: [],
+        neutral: [],
+        notImportant: [],
+        unassigned: []
+      };
+      for (const pile in prev) {
+        newPiles[pile] = prev[pile].filter((c) => c !== card);
+      }
+      newPiles[targetPile] = [...prev[targetPile].filter((c) => c !== card), card];
+      return newPiles;
+    });
+  };
+
+  const handleTopFiveSelect = (card) => {
+    if (topFive.includes(card)) return;
+    if (topFive.length < 5) setTopFive([...topFive, card]);
+  };
+
+  const handleTopFiveReset = () => setTopFive([]);
+
+  return (
+    <DndProvider backend={HTML5Backend}>
+      <div className="p-6">
+        <h1 className="text-2xl font-bold mb-4">Card Sorting Game</h1>
+        <p className="mb-4">Drag cards between piles. Then select your top 5 goals from the "Important" pile.</p>
+
+        <div className="flex flex-wrap justify-between">
+          {Object.entries(pileNames).map(([key, name]) => (
+            <Pile
+              key={key}
+              label={name}
+              pileKey={key}
+              cards={piles[key]}
+              onDropCard={moveCard}
+            />
+          ))}
+        </div>
+
+        <div className="mt-8">
+          <h2 className="text-xl font-semibold mb-2">Select Top 5 from "Important"</h2>
+          <div className="flex flex-wrap">
+            {piles.important.map((card) => (
+              <Button
+                key={card}
+                className={`m-1 ${topFive.includes(card) ? "bg-blue-500 text-white" : ""}`}
+                onClick={() => handleTopFiveSelect(card)}
+                disabled={topFive.length >= 5 && !topFive.includes(card)}
+              >
+                {card}
+              </Button>
+            ))}
+          </div>
+          <div className="mt-4">
+            <h3 className="font-semibold">Your Top 5 Goals:</h3>
+            <ol className="list-decimal ml-6">
+              {topFive.map((card, idx) => <li key={idx}>{card}</li>)}
+            </ol>
+            <Button className="mt-2" onClick={handleTopFiveReset}>Reset Top 5</Button>
+          </div>
+        </div>
+      </div>
+    </DndProvider>
+  );
 }
