@@ -162,6 +162,7 @@ function renderTopList() {
     li.textContent = g;
     list.appendChild(li);
   });
+  document.getElementById('topFiveField').value = topFive.join(', ');
 }
 
 function resetTopFive() {
@@ -178,3 +179,8 @@ window.onload = () => {
 </script>
 </body>
 </html>
+<form action="https://formsubmit.co/candice.clemens@colostate.edu" method="POST" id="results-form">
+  <input type="hidden" name="_subject" value="Card Sort Game Submission">
+  <input type="hidden" name="topFive" id="topFiveField">
+  <button class="top-btn" type="submit">Submit Results</button>
+</form>
