@@ -90,6 +90,18 @@
   <ol id="top-list"></ol>
   <button class="top-btn" onclick="resetTopFive()">Reset Top 5</button>
 </div>
+function updateFormFields() {
+  document.getElementById('topFiveField').value = topFive.join(', ');
+  document.getElementById('importantField').value = getPileValues('important');
+  document.getElementById('neutralField').value = getPileValues('neutral');
+  document.getElementById('notImportantField').value = getPileValues('notImportant');
+  document.getElementById('unassignedField').value = getPileValues('unassigned');
+}
+
+function getPileValues(pileId) {
+  const cards = document.getElementById(pileId).querySelectorAll('.card');
+  return Array.from(cards).map(c => c.textContent).join(', ');
+}
 
 <script>
 const goals = [
@@ -176,11 +188,36 @@ window.onload = () => {
   const unassigned = document.getElementById('unassigned');
   goals.forEach(goal => unassigned.appendChild(createCard(goal)));
 };
+  document.getElementById('results-form').addEventListener('submit', function (e) {
+  updateFormFields();
+});
+
 </script>
 </body>
 </html>
 <form action="https://formsubmit.co/candice.clemens@colostate.edu" method="POST" id="results-form">
   <input type="hidden" name="_subject" value="Card Sort Game Submission">
   <input type="hidden" name="topFive" id="topFiveField">
+  <input type="hidden" name="importantPile" id="importantField">
+  <input type="hidden" name="neutralPile" id="neutralField">
+  <input type="hidden" name="notImportantPile" id="notImportantField">
+  <input type="hidden" name="unassignedPile" id="unassignedField">
   <button class="top-btn" type="submit">Submit Results</button>
 </form>
+
+function updateFormFields() {
+  document.getElementById('topFiveField').value = topFive.join(', ');
+  document.getElementById('importantField').value = getPileValues('important');
+  document.getElementById('neutralField').value = getPileValues('neutral');
+  document.getElementById('notImportantField').value = getPileValues('notImportant');
+  document.getElementById('unassignedField').value = getPileValues('unassigned');
+document.getElementById('results-form').addEventListener('submit', function (e) {
+  updateFormFields();
+});
+
+}
+
+function getPileValues(pileId) {
+  const cards = document.getElementById(pileId).querySelectorAll('.card');
+  return Array.from(cards).map(c => c.textContent).join(', ');
+}
